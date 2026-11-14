@@ -1,0 +1,27 @@
+23,200 imágenes seleccionadas.
+Calentando la caché del sistema de archivos... 5.0s
+[rep 1] secuencial: 33.81s
+[rep 1] paralela 1 procesos: 28.76s (+0.58s de arranque) idéntico=True
+[rep 1] paralela 2 procesos: 17.30s (+0.64s de arranque) idéntico=True
+[rep 1] paralela 4 procesos: 12.29s (+0.69s de arranque) idéntico=True
+[rep 1] paralela 8 procesos: 9.21s (+0.99s de arranque) idéntico=True
+[rep 2] secuencial: 23.59s
+[rep 2] paralela 1 procesos: 24.91s (+0.32s de arranque) idéntico=True
+[rep 2] paralela 2 procesos: 15.74s (+0.47s de arranque) idéntico=True
+[rep 2] paralela 4 procesos: 11.74s (+0.55s de arranque) idéntico=True
+[rep 2] paralela 8 procesos: 8.62s (+0.74s de arranque) idéntico=True
+[rep 3] secuencial: 21.45s
+[rep 3] paralela 1 procesos: 23.92s (+0.25s de arranque) idéntico=True
+[rep 3] paralela 2 procesos: 15.44s (+0.31s de arranque) idéntico=True
+[rep 3] paralela 4 procesos: 11.66s (+0.55s de arranque) idéntico=True
+[rep 3] paralela 8 procesos: 8.76s (+0.83s de arranque) idéntico=True
+[rep 4] secuencial: 23.83s
+[rep 4] paralela 1 procesos: 35.62s (+0.45s de arranque) idéntico=True
+[rep 4] paralela 2 procesos: 16.87s (+0.37s de arranque) idéntico=True
+[rep 4] paralela 4 procesos: 12.24s (+0.55s de arranque) idéntico=True
+[rep 4] paralela 8 procesos: 8.74s (+0.87s de arranque) idéntico=True
+[rep 5] secuencial: 21.81s
+[rep 5] paralela 1 procesos: 25.72s (+0.26s de arranque) idéntico=True
+[rep 5] paralela 2 procesos: 17.70s (+0.52s de arranque) idéntico=True
+[rep 5] paralela 4 procesos: 14.54s (+0.58s de arranque) idéntico=True
+[rep 5] paralela 8 procesos: 11.54s (+0.93s de arranque) idéntico=True

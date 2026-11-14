@@ -1,0 +1,25 @@
+Datos: train (16240, 64, 64, 3), val (3480, 64, 64, 3), test (3480, 64, 64, 3)
+
+=== torch | cpu | CNN Profunda | rep 1/1 ===
+Época  1/2 - 368.7s (train 346.6s) - acc 0.3134 loss 2.2811 - val_acc 0.0345 val_loss 10.6946
+Época  2/2 - 379.7s (train 357.7s) - acc 0.7254 loss 0.8148 - val_acc 0.3756 val_loss 2.3185
+{
+ "fecha": "20261113_202331",
+ "rep": 1,
+ "framework": "torch",
+ "dispositivo": "cpu",
+ "modelo": "CNN Profunda",
+ "epocas": 2,
+ "lote": 64,
+ "t_total_s": 748.385,
+ "t_primera_epoca_s": 368.669,
+ "t_epoca_media_sin_1ra_s": 379.716,
+ "t_transferencia_s": 0.0,
+ "t_computo_gpu_s": 0.0,
+ "val_accuracy_final": 0.3756,
+ "test_accuracy": 0.3914,
+ "t_inferencia_test_s": 20.9727,
+ "cpu_media_pct": 82.8,
+ "gpu_util_media_pct": 0.0,
+ "gpu_mem_max_mb": 0.0
+}

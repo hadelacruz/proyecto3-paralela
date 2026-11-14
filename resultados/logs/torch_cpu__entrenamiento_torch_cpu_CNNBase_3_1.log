@@ -1,0 +1,26 @@
+Datos: train (16240, 64, 64, 3), val (3480, 64, 64, 3), test (3480, 64, 64, 3)
+
+=== torch | cpu | CNN Base | rep 1/1 ===
+Época  1/3 - 199.3s (train 183.1s) - acc 0.2507 loss 2.5488 - val_acc 0.5980 val_loss 1.3706
+Época  2/3 - 127.5s (train 117.6s) - acc 0.6151 loss 1.1612 - val_acc 0.8322 val_loss 0.5743
+Época  3/3 - 121.8s (train 112.1s) - acc 0.7835 loss 0.6468 - val_acc 0.8868 val_loss 0.3724
+{
+ "fecha": "20261113_200921",
+ "rep": 1,
+ "framework": "torch",
+ "dispositivo": "cpu",
+ "modelo": "CNN Base",
+ "epocas": 3,
+ "lote": 64,
+ "t_total_s": 448.525,
+ "t_primera_epoca_s": 199.286,
+ "t_epoca_media_sin_1ra_s": 124.619,
+ "t_transferencia_s": 0.0,
+ "t_computo_gpu_s": 0.0,
+ "val_accuracy_final": 0.8868,
+ "test_accuracy": 0.8937,
+ "t_inferencia_test_s": 9.721,
+ "cpu_media_pct": 90.7,
+ "gpu_util_media_pct": 0.0,
+ "gpu_mem_max_mb": 0.0
+}

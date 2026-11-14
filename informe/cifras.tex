@@ -1,0 +1,123 @@
+% Archivo generado por `python -m src.cifras_latex`. No editar a mano.
+\newcommand{\TablaLabTres}{\begin{tabular}{lrrrrrrr}
+\toprule
+Modelo & Épocas & Min & s/época & Exactitud & Épocas & Min & Exactitud \\
+\midrule
+CNN Base & 20 & 10.0 & 30.0 & 98.33\% & 20 & 3.4 & 98.62\% \\
+CNN Profunda & 13 & 31.9 & 147.2 & 97.56\% & 13 & 11.7 & 98.36\% \\
+Red Densa (MLP) & 7 & 1.6 & 13.7 & 3.45\% & 6 & 0.8 & 3.45\% \\
+CNN Base + Aug & 30 & 18.7 & 37.4 & 99.17\% & 30 & 5.8 & 99.25\% \\
+CNN Profunda + Aug & 19 & 50.2 & 158.5 & 99.40\% & 30 & 30.8 & 99.31\% \\
+CNN Base + Espejo & 30 & 18.2 & 36.4 & 97.64\% & 30 & 6.3 & 96.38\% \\
+\bottomrule
+\end{tabular}}
+\newcommand{\LabTresMinAqui}{110.8}
+\newcommand{\LabTresMinOrig}{51.7}
+\newcommand{\LabTresEpocaBase}{30}
+\newcommand{\LabTresEpocaProfunda}{147}
+\newcommand{\TablaPreparacion}{\begin{tabular}{lrrrrrr}
+\toprule
+Variante & Procesos & Tiempo (s) & Con arranque (s) & Speedup & Eficiencia & Imágenes/s \\
+\midrule
+Secuencial (Lab 3) & 1 & 24.90 $\pm$ 5.09 & 24.90 & 1.00$\times$ & 100\% & 932 \\
+Paralela & 1 & 27.78 $\pm$ 4.74 & 28.15 & 0.90$\times$ & 90\% & 835 \\
+Paralela & 2 & 16.61 $\pm$ 0.98 & 17.07 & 1.50$\times$ & 75\% & 1\,397 \\
+Paralela & 4 & 12.49 $\pm$ 1.18 & 13.08 & 1.99$\times$ & 50\% & 1\,857 \\
+Paralela & 8 & 9.37 $\pm$ 1.23 & 10.25 & 2.66$\times$ & 33\% & 2\,475 \\
+\bottomrule
+\end{tabular}}
+\newcommand{\PrepSeq}{24.9}
+\newcommand{\PrepPar}{9.4}
+\newcommand{\PrepSpeedup}{2.66$\times$}
+\newcommand{\PrepEficiencia}{33\%}
+\newcommand{\PrepReps}{5}
+\newcommand{\PrepIdentico}{sí}
+\newcommand{\TablaEntrenamiento}{\begin{tabular}{llrrrrrrr}
+\toprule
+Modelo & Configuración & Corr. & s/época & Speedup & Inferencia (s) & Speedup inf. & Reloj GPU (MHz) & Exactitud \\
+\midrule
+CNN Base & CPU · Keras/TF (original) & 3 & 34.8 $\pm$ 3.6 & 1.0$\times$ & 2.57 & 1.0$\times$ & --- & 90.5\% \\
+ & CPU · PyTorch & 1 & 124.6 & 0.3$\times$ & 9.72 & 0.3$\times$ & --- & 89.4\% \\
+ & GPU · PyTorch + cuDNN & 3 & 8.9 $\pm$ 1.3 & 3.9$\times$ & 0.68 & 3.7$\times$ & 1\,275 & 88.5\% \\
+ & GPU · Numba (kernels propios) & 3 & 52.7 $\pm$ 4.0 & 0.7$\times$ & 2.61 & 1.0$\times$ & 420 & 89.1\% \\
+\midrule
+CNN Profunda & CPU · Keras/TF (original) & 3 & 241.3 $\pm$ 1.3 & 1.0$\times$ & 12.39 & 1.0$\times$ & --- & 75.1\% \\
+ & CPU · PyTorch & 1 & 379.7 & 0.6$\times$ & 20.97 & 0.6$\times$ & --- & 39.1\% \\
+ & GPU · PyTorch + cuDNN & 3 & 34.1 $\pm$ 4.8 & 7.1$\times$ & 2.25 & 5.5$\times$ & 465 & 91.0\% \\
+\midrule
+CNN Base + Aug & CPU · Keras/TF (original) & 3 & 39.5 $\pm$ 4.3 & 1.0$\times$ & 2.20 & 1.0$\times$ & --- & 70.8\% \\
+ & GPU · PyTorch + cuDNN & 3 & 12.4 $\pm$ 0.9 & 3.2$\times$ & 0.76 & 2.9$\times$ & 525 & 79.0\% \\
+\midrule
+CNN Profunda + Aug & CPU · Keras/TF (original) & 3 & 242.5 $\pm$ 21.6 & 1.0$\times$ & 15.45 & 1.0$\times$ & --- & 73.5\% \\
+ & GPU · PyTorch + cuDNN & 3 & 36.4 $\pm$ 3.8 & 6.7$\times$ & 2.22 & 7.0$\times$ & 405 & 85.9\% \\
+\bottomrule
+\end{tabular}}
+\newcommand{\SpeedupMin}{3.2$\times$}
+\newcommand{\SpeedupMax}{7.1$\times$}
+\newcommand{\SpeedupInfMin}{2.9$\times$}
+\newcommand{\SpeedupInfMax}{7.0$\times$}
+\newcommand{\SpeedupNumba}{0.66$\times$}
+\newcommand{\NumbaVsTorchCPU}{2.4$\times$}
+\newcommand{\NumbaEpoca}{53}
+\newcommand{\NumbaReloj}{420}
+\newcommand{\GpuEpocaBase}{8.9}
+\newcommand{\GpuEpocaProfunda}{34.1}
+\newcommand{\GpuRelojBase}{1\,275}
+\newcommand{\GpuRelojProfunda}{465}
+\newcommand{\KerasEpocaBase}{35}
+\newcommand{\KerasEpocaProfunda}{241}
+\newcommand{\SpeedupBaseLab}{3.4$\times$}
+\newcommand{\SpeedupProfundaLab}{4.3$\times$}
+\newcommand{\TablaDesglose}{\begin{tabular}{llrrrrr}
+\toprule
+Configuración & Modelo & Época (s) & CPU$\to$GPU (s) & Cómputo GPU (s) & Resto (s) & \% transf. \\
+\midrule
+GPU · Numba (kernels propios) & CNN Base & 52.67 & 0.20 & 49.82 & 2.65 & 0.4\% \\
+GPU · PyTorch + cuDNN & CNN Base & 8.93 & 0.19 & 8.02 & 0.71 & 2.2\% \\
+GPU · PyTorch + cuDNN & CNN Profunda & 34.12 & 0.21 & 31.31 & 2.60 & 0.6\% \\
+GPU · PyTorch + cuDNN & CNN Base + Aug & 12.41 & 0.20 & 11.55 & 0.66 & 1.6\% \\
+GPU · PyTorch + cuDNN & CNN Profunda + Aug & 36.37 & 0.18 & 34.17 & 2.02 & 0.5\% \\
+\bottomrule
+\end{tabular}}
+\newcommand{\TransfMaxPct}{2.2\%}
+\newcommand{\TransfMinPct}{0.4\%}
+\newcommand{\TablaCompleto}{\begin{tabular}{lrrrrrrr}
+\toprule
+Modelo & Épocas & Min & Exactitud & Épocas & Min & Exactitud & Speedup/época \\
+\midrule
+CNN Base & 20 & 10.0 & 98.33\% & 20 & 3.5 & 98.42\% & 2.9$\times$ \\
+CNN Profunda & 13 & 31.9 & 97.56\% & 10 & 5.3 & 98.42\% & 4.8$\times$ \\
+CNN Base + Aug & 30 & 18.7 & 99.17\% & 30 & 6.6 & 99.28\% & 2.8$\times$ \\
+CNN Profunda + Aug & 19 & 50.2 & 99.40\% & 30 & 16.9 & 99.94\% & 4.7$\times$ \\
+\midrule
+\textbf{Total} &  & \textbf{110.8} &  &  & \textbf{32.3} &  &  \\
+\bottomrule
+\end{tabular}}
+\newcommand{\CompletoMinCPU}{110.8}
+\newcommand{\CompletoMinGPU}{32.3}
+\newcommand{\TablaFases}{\begin{tabular}{p{5.2cm}rrp{3.3cm}rr}
+\toprule
+Fase & Original (s) & Paralelo (s) & Hardware paralelo & Speedup & \% del original \\
+\midrule
+1. Preparación de 23,200 imágenes & 24.9 & 9.4 & CPU, 8 procesos & 2.66$\times$ & 0.4\% \\
+2. Entrenamiento de los 4 modelos (EarlyStopping) & 6\,648.0 & 1\,938.7 & GPU MX450 (PyTorch + cuDNN) & 3.43$\times$ & 99.1\% \\
+3. Inferencia sobre prueba (4 modelos) & 32.6 & 5.9 & GPU MX450 & 5.52$\times$ & 0.5\% \\
+\midrule
+\textbf{Total del pipeline} & 6\,705.5 & 1\,954.0 &  & 3.43$\times$ & 100.0\% \\
+\bottomrule
+\end{tabular}}
+\newcommand{\SpeedupTotal}{3.43$\times$}
+\newcommand{\SpeedupEntrenamientoTotal}{3.43$\times$}
+\newcommand{\FraccionEntrenamiento}{99.1\%}
+\newcommand{\FraccionPrep}{0.4\%}
+\newcommand{\AmdahlSoloGPU}{3.36$\times$}
+\newcommand{\AmdahlLimite}{117$\times$}
+\newcommand{\TablaNumbaVersiones}{\begin{tabular}{lrrr}
+\toprule
+Versión & ms por paso & s por época (254 pasos) & Mejora sobre v1 \\
+\midrule
+v1 directa (un hilo por salida) & 1154.9 & 293.4 & 1.0$\times$ \\
+v2 implicit GEMM, baldosas 16$\times$16 & 255.5 & 64.9 & 4.5$\times$ \\
+v3 implicit GEMM + register tiling 4$\times$4 & 175.4 & 44.6 & 6.6$\times$ \\
+\bottomrule
+\end{tabular}}

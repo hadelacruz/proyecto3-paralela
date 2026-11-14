@@ -1,0 +1,76 @@
+Datos: train (16240, 64, 64, 3), val (3480, 64, 64, 3), test (3480, 64, 64, 3)
+
+=== torch | cuda | CNN Base | rep 1/3 ===
+Época  1/3 -  10.7s (train   9.2s) | transf 0.19s cómputo 9.02s - acc 0.1956 loss 2.7583 - val_acc 0.5264 val_loss 1.5959
+Época  2/3 -   8.0s (train   7.4s) | transf 0.19s cómputo 7.18s - acc 0.5523 loss 1.3894 - val_acc 0.7851 val_loss 0.7376
+Época  3/3 -   8.0s (train   7.4s) | transf 0.19s cómputo 7.20s - acc 0.7307 loss 0.8011 - val_acc 0.8546 val_loss 0.4899
+{
+ "fecha": "20261113_193105",
+ "rep": 1,
+ "framework": "torch",
+ "dispositivo": "cuda",
+ "modelo": "CNN Base",
+ "epocas": 3,
+ "lote": 64,
+ "t_total_s": 26.687,
+ "t_primera_epoca_s": 10.658,
+ "t_epoca_media_sin_1ra_s": 8.014,
+ "t_transferencia_s": 0.577,
+ "t_computo_gpu_s": 23.402,
+ "val_accuracy_final": 0.8546,
+ "test_accuracy": 0.8661,
+ "t_inferencia_test_s": 0.6269,
+ "cpu_media_pct": 34.1,
+ "gpu_util_media_pct": 72.5,
+ "gpu_mem_max_mb": 637.0
+}
+
+=== torch | cuda | CNN Base | rep 2/3 ===
+Época  1/3 -   8.1s (train   7.5s) | transf 0.20s cómputo 7.30s - acc 0.2490 loss 2.5658 - val_acc 0.6046 val_loss 1.3852
+Época  2/3 -   8.2s (train   7.6s) | transf 0.19s cómputo 7.40s - acc 0.6317 loss 1.1510 - val_acc 0.8129 val_loss 0.6296
+Época  3/3 -   8.4s (train   7.8s) | transf 0.19s cómputo 7.57s - acc 0.7810 loss 0.6549 - val_acc 0.8899 val_loss 0.3774
+{
+ "fecha": "20261113_193131",
+ "rep": 2,
+ "framework": "torch",
+ "dispositivo": "cuda",
+ "modelo": "CNN Base",
+ "epocas": 3,
+ "lote": 64,
+ "t_total_s": 24.746,
+ "t_primera_epoca_s": 8.127,
+ "t_epoca_media_sin_1ra_s": 8.309,
+ "t_transferencia_s": 0.586,
+ "t_computo_gpu_s": 22.262,
+ "val_accuracy_final": 0.8899,
+ "test_accuracy": 0.8943,
+ "t_inferencia_test_s": 0.6286,
+ "cpu_media_pct": 28.6,
+ "gpu_util_media_pct": 97.6,
+ "gpu_mem_max_mb": 597.0
+}
+
+=== torch | cuda | CNN Base | rep 3/3 ===
+Época  1/3 -   8.4s (train   7.8s) | transf 0.19s cómputo 7.58s - acc 0.2490 loss 2.5658 - val_acc 0.6046 val_loss 1.3852
+Época  2/3 -   8.6s (train   7.8s) | transf 0.19s cómputo 7.61s - acc 0.6317 loss 1.1510 - val_acc 0.8129 val_loss 0.6296
+Época  3/3 -  12.4s (train  11.6s) | transf 0.19s cómputo 11.37s - acc 0.7810 loss 0.6549 - val_acc 0.8899 val_loss 0.3774
+{
+ "fecha": "20261113_193201",
+ "rep": 3,
+ "framework": "torch",
+ "dispositivo": "cuda",
+ "modelo": "CNN Base",
+ "epocas": 3,
+ "lote": 64,
+ "t_total_s": 29.334,
+ "t_primera_epoca_s": 8.408,
+ "t_epoca_media_sin_1ra_s": 10.463,
+ "t_transferencia_s": 0.571,
+ "t_computo_gpu_s": 26.559,
+ "val_accuracy_final": 0.8899,
+ "test_accuracy": 0.8943,
+ "t_inferencia_test_s": 0.7991,
+ "cpu_media_pct": 29.8,
+ "gpu_util_media_pct": 98.3,
+ "gpu_mem_max_mb": 597.0
+}

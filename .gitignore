@@ -1,0 +1,44 @@
+# Dataset (~1.3 GB): se descarga de Kaggle, no se versiona
+asl_alphabet_train/
+asl_alphabet_test/
+*.zip
+*.rar
+*.tar.gz
+
+# Copia local del repo original del Lab 3 (repo git independiente).
+# Su contenido versionado ya está copiado en lab3_original/ y fotos_propias/.
+Lab3_DataScience/
+
+# Paso intermedio de src/correr_experimentos.py: el Lab 3 con la semilla corregida, sin
+# ejecutar. Se regenera solo; el que se versiona es lab3_reproducible_ejecutado.ipynb.
+resultados/lab3_reproducible.ipynb
+
+# Archivos auxiliares de LaTeX (se versiona Informe.tex y el PDF final)
+informe/*.aux
+informe/*.log
+informe/*.out
+informe/*.toc
+informe/*.synctex.gz
+informe/*.fdb_latexmk
+informe/*.fls
+
+# Tensores preprocesados y pesos de modelos (se regeneran)
+*.npy
+*.npz
+*.pt
+*.keras
+*.h5
+
+# Entornos virtuales (el del proyecto vive fuera de OneDrive)
+.venv/
+venv/
+
+# Cachés de Python / Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini

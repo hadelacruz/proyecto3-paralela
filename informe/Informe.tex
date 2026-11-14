@@ -1,0 +1,434 @@
+% =============================================================================
+% Proyecto 3: Mejorando algoritmos con CUDA — Informe de rendimiento y análisis
+% CC3069 Computación Paralela y Distribuida, UVG, semestre II-2026
+%
+% Compilar desde la carpeta informe/ (pdflatex dos veces, o en Overleaf):
+%     pdflatex Informe.tex && pdflatex Informe.tex
+%
+% Las tablas y cifras vienen de informe/cifras.tex, que se genera con
+%     python -m src.cifras_latex
+% a partir de resultados/. Lo que aún no se ha medido aparece en rojo como
+% [pendiente]. Las figuras salen de informe/figuras/ (las guarda el notebook) y
+% las capturas de ../evidencias/ (ver evidencias/GUIA_CAPTURAS.md): si un archivo
+% no existe, en su lugar aparece un recuadro con el nombre que debe tener.
+% =============================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish,es-nodecimaldot,es-tabla]{babel}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit}
+\usepackage[hidelinks]{hyperref}
+
+\setlist{itemsep=2pt,topsep=4pt}
+\setlength{\parskip}{4pt}
+
+% --- Marcadores para lo que falta ---------------------------------------------
+\newcommand{\pend}[1]{\textcolor{red}{\textbf{[#1]}}}
+
+% Figura generada por el notebook (informe/figuras/)
+\newcommand{\figura}[3][0.95]{%
+  \begin{figure}[H]\centering
+  \IfFileExists{figuras/#2.png}{\includegraphics[width=#1\textwidth]{figuras/#2.png}}%
+    {\fbox{\parbox[c][3cm][c]{0.8\textwidth}{\centering\pend{figura pendiente}\\\texttt{\detokenize{figuras/#2.png}}\\(se genera al ejecutar el notebook)}}}
+  \caption{#3}\label{fig:#2}
+  \end{figure}}
+
+% Captura de pantalla (evidencias/)
+\newcommand{\captura}[2]{%
+  \begin{figure}[H]\centering
+  \IfFileExists{../evidencias/#1}{\includegraphics[width=0.92\textwidth]{../evidencias/#1}}%
+    {\fbox{\parbox[c][4.5cm][c]{0.8\textwidth}{\centering\pend{captura pendiente}\\[2pt]\texttt{\detokenize{evidencias/#1}}}}}
+  \caption{#2}
+  \end{figure}}
+
+\newcommand{\tablaancha}[1]{\resizebox{\textwidth}{!}{#1}}
+\newcommand{\cod}[1]{\texttt{#1}}
+
+\input{cifras}
+
+% =============================================================================
+\begin{document}
+
+\begin{titlepage}
+\centering
+{\large Universidad del Valle de Guatemala\\Facultad de Ingeniería\\Departamento de Ciencias de la Computación\par}
+\vspace{0.5cm}
+{\large CC3069 -- Computación Paralela y Distribuida\\Semestre II-2026\par}
+\vspace{3cm}
+{\LARGE\bfseries Proyecto 3: Mejorando algoritmos con CUDA\par}
+\vspace{0.6cm}
+{\Large Informe de rendimiento y análisis\par}
+\vspace{0.4cm}
+{\large Aceleración del Laboratorio 3 de Data Science:\\reconocimiento del alfabeto ASL con redes convolucionales\par}
+\vfill
+{\large
+Daniel Oswaldo Juárez Herrera\\
+Humberto Alexander de la Cruz\\
+Nicolle Alexandra Gordillo\par}
+\vspace{1.5cm}
+{\large Noviembre de 2026\par}
+\end{titlepage}
+
+% =============================================================================
+\section*{Resumen}
+
+El Laboratorio 3 de Data Science entrena redes convolucionales que clasifican 29 señas del alfabeto ASL a partir de 23\,200 fotografías. En el original, todo corre en la CPU con Keras/TensorFlow. En este proyecto el flujo se separa en dos fases, cada una en el hardware que mejor la ejecuta:
+\begin{enumerate}
+  \item La \textbf{preparación de datos} (leer, decodificar y redimensionar los JPEG) corre en \textbf{varios núcleos del CPU}, con procesos y memoria compartida.
+  \item El \textbf{entrenamiento y la inferencia} de las redes corren en la \textbf{GPU con CUDA}, con PyTorch + cuDNN y con kernels propios escritos en CUDA Python (Numba).
+\end{enumerate}
+
+Todas las mediciones se hicieron en la misma laptop (Intel Core i7-11390H y NVIDIA GeForce MX450), con los mismos datos y varias repeticiones:
+\begin{itemize}
+  \item La preparación en 8 procesos tardó \PrepPar\,s contra \PrepSeq\,s de la versión secuencial, un speedup de \PrepSpeedup.
+  \item Con cuDNN, el tiempo por época del entrenamiento bajó entre \SpeedupMin{} y \SpeedupMax{}, según el modelo. Si se toma como referencia el Lab 3 completo, donde el CPU no llegó a su límite térmico, el speedup va de \SpeedupBaseLab{} a \SpeedupProfundaLab.
+  \item De extremo a extremo, el pipeline se aceleró \SpeedupTotal.
+\end{itemize}
+Las transferencias entre CPU y GPU ocuparon menos del \TransfMaxPct{} de cada época. La limitante principal resultó ser el límite de potencia de la laptop: tras unos 30 segundos de carga, la GPU baja su reloj a un tercio.
+
+% =============================================================================
+\section{Análisis de la solución secuencial}
+
+El Lab 3 es un notebook de 57 celdas. Sus partes principales son:
+\begin{itemize}
+  \item carga del dataset y análisis exploratorio (Ejercicios 1 y 2);
+  \item preprocesamiento: 800 imágenes por clase, redimensionadas a $64\times64$ (Ejercicio 3);
+  \item partición estratificada 70/15/15;
+  \item dos CNN en Keras, la Base y la Profunda (Ejercicio 4);
+  \item una red densa de referencia (Ejercicio 5);
+  \item algoritmos clásicos con scikit-learn (Ejercicio 6);
+  \item reentrenamiento con aumento de datos (Ejercicio 7);
+  \item prueba con fotos propias (Ejercicio 8) y análisis de sesgo (Ejercicio 9).
+\end{itemize}
+El trabajo pesado está en el preprocesamiento y en el entrenamiento de las cuatro CNN: en la máquina original, este último tomó 52 de los $\sim$60 minutos del notebook.
+
+\begin{table}[H]\centering\small
+\caption{Operaciones del programa, desde la recepción de las imágenes hasta el resultado.}
+\label{tab:operaciones}
+\begin{tabular}{rlp{10.2cm}}
+\toprule
+No. & Operación identificada & Descripción de su funcionamiento \\
+\midrule
+1 & Listado de archivos & \cod{os.listdir} en las 29 carpetas (3\,000 archivos cada una). \\
+2 & Submuestreo & Elige 800 archivos por clase con semilla fija: 23\,200 imágenes. \\
+3 & Lectura & Lee del disco los bytes de cada JPEG ($\sim$15\,KB). \\
+4 & Decodificación JPEG & Pillow descomprime cada imagen a $200\times200\times3$ píxeles (Huffman + IDCT por bloques de $8\times8$). \\
+5 & Redimensión & \cod{resize((64,64))} con filtro bicúbico. \\
+6 & Normalización & Convierte a \cod{float32} y divide entre 255. El tensor final $X$ mide $23\,200\times64\times64\times3$ (1.14\,GB). \\
+7 & Partición & \cod{train\_test\_split} estratificado: 16\,240 / 3\,480 / 3\,480 imágenes. \\
+8 & Barajado y loteo & En cada época se barajan los índices y se arman lotes de 64 (254 lotes por época). \\
+9 & Convolución $3\times3$ + ReLU & Cada salida es una suma de $9\cdot C_{in}$ productos más un sesgo. Es la operación dominante. \\
+10 & Max-pooling $2\times2$ & Reduce a la mitad el alto y el ancho tomando el máximo de cada ventana. \\
+11 & Capas densas & Productos de matrices (8192$\rightarrow$128$\rightarrow$29 en la Base). \\
+12 & BatchNorm / Dropout & Normaliza por canal y apaga activaciones al azar durante el entrenamiento. \\
+13 & Softmax + entropía cruzada & Convierte los logits en probabilidades y calcula la pérdida del lote. \\
+14 & Retropropagación & Calcula los gradientes de todas las capas en orden inverso; cuesta $\sim$2 veces la propagación hacia adelante. \\
+15 & Actualización Adam & Actualiza cada parámetro con sus dos momentos (1.15 M parámetros en la Base). \\
+16 & Validación & Propagación hacia adelante sobre 3\,480 imágenes al final de cada época. \\
+17 & Inferencia y métricas & \cod{predict} sobre el conjunto de prueba, exactitud y matriz de confusión. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]\centering\small
+\caption{Operaciones que se repiten y cuántas veces.}
+\label{tab:repetitivas}
+\begin{tabular}{p{4.3cm}p{4.3cm}p{6.6cm}}
+\toprule
+Operación repetitiva & Datos que procesa & Cantidad de repeticiones \\
+\midrule
+Lectura + decodificación + redimensión & un JPEG de $200\times200\times3$ & 23\,200 (una por imagen) \\
+Normalización ($\div255$) & 12\,288 valores por imagen & 285 millones de divisiones \\
+Paso de entrenamiento & un lote de $64\times64\times64\times3$ & 254 por época $\times$ 13--30 épocas $\times$ 4 modelos \\
+Multiplicación-suma de las convoluciones & ventana $3\times3\times C_{in}$ por filtro & 42.3 M por imagen (Base) y 154.6 M (Profunda), por 16\,240 imágenes y por 3 (adelante + atrás) en cada época: $\sim$4.1 y $\sim$15 TFLOP por época \\
+Max-pooling & ventanas $2\times2$ & 3 capas por imagen, en cada paso \\
+Actualización de Adam & 1\,145\,693 (Base) / 327\,933 (Profunda) parámetros & una vez por lote: 254 por época \\
+Validación & 3\,480 imágenes & una vez por época \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Dos convoluciones concentran el 89\,\% del cómputo de la CNN Base, y las seis convoluciones de la Profunda concentran el 98\,\% del suyo. Son millones de multiplicaciones-suma idénticas e independientes entre sí: el tipo de trabajo para el que existe una GPU. La preparación, en cambio, consiste en 23\,200 tareas independientes pero cargadas de lógica (descompresión, ramas y acceso a disco), que encajan mejor en núcleos de CPU.
+
+% =============================================================================
+\section{Metodología de medición}
+
+\begin{itemize}
+  \item \textbf{Mismo hardware para todo:} Intel Core i7-11390H (4 núcleos / 8 hilos, AVX-512), 16\,GB de RAM y NVIDIA GeForce MX450 de 2\,GB (Turing, modo WDDM), con Windows 11, la laptop conectada a la corriente y el modo de energía en ``Mejor rendimiento''. El software fue PyTorch 2.11 con CUDA 12.8 y cuDNN 9.19, TensorFlow 2.21 (CPU) y Numba 0.68 con numba-cuda 0.30. Los tiempos del Lab 3 original se midieron en otra computadora: se muestran como referencia, pero no se usan para calcular speedups.
+  \item \textbf{Mismos datos:} el mismo subconjunto de 23\,200 imágenes en todas las corridas. Para lograrlo se corrigió un detalle del Lab 3, que tomaba la muestra antes de fijar la semilla y sin ordenar los archivos.
+  \item \textbf{Repeticiones:} \PrepReps{} corridas de la preparación y 3 de cada entrenamiento, con 60\,s de pausa entre corridas. Se reportan la media y la desviación estándar.
+  \item \textbf{Mismo trabajo:} para comparar dispositivos, cada entrenamiento corre 3 épocas fijas, sin EarlyStopping. La primera época se descarta porque incluye compilación y autoajuste. Se reporta la media de las épocas 2 y 3.
+  \item \textbf{Extremo a extremo:} además se ejecutó el Lab 3 completo en esta laptop, y en el notebook entregable los cuatro modelos se entrenan en GPU con las mismas reglas de EarlyStopping que el Lab 3.
+  \item \textbf{Transferencias:} el tiempo de las copias CPU$\rightarrow$GPU y el del cómputo en la GPU se miden por separado con eventos CUDA (\cod{torch.cuda.Event}, \cod{cuda.event}).
+  \item \textbf{Monitoreo:} cada corrida registra, una vez por segundo, el uso de cada núcleo (\cod{psutil}) y el uso, la memoria, la temperatura y el reloj de la GPU (\cod{nvidia-smi}). Los registros están en \cod{resultados/monitor/}.
+  \item \textbf{Mediciones descartadas:} la primera medición de la línea base en CPU corrió con 14--15.8\,GB de RAM ocupados, y sus épocas tardaron 1.8 veces más que en el Lab 3 completo. Se descartó. Un segundo intento corrió con Windows en modo ``Mejor eficiencia energética'': el CPU estaba ocupado al 100\,\%, pero a $\sim$27\,\% de su frecuencia máxima. También se descartó. Ambos intentos se conservan en \cod{resultados/descartado/}.
+  \item \textbf{Límite térmico del CPU:} la laptop tiene activo el marco térmico de Intel (DPTF), que baja la potencia del CPU cuando la carga se sostiene varios minutos. Esto afectó a las corridas de la CNN Profunda en Keras (sección~\ref{sec:cpu-termico}). Esas mediciones se conservan, y el speedup se reporta también contra el Lab 3 completo.
+\end{itemize}
+
+% =============================================================================
+\section{Oportunidades de paralelización y diseño}
+
+\begin{table}[H]\centering\small
+\caption{Qué se paraleliza, dónde y por qué.}
+\label{tab:oportunidades}
+\begin{tabular}{p{3.6cm}p{2.6cm}p{9.2cm}}
+\toprule
+Operación & Dónde & Justificación \\
+\midrule
+Lectura, decodificación y redimensión & CPU, 8 procesos & Son 23\,200 tareas independientes con lógica de muchas ramas y acceso a disco. Los hilos de Python no escalan por el GIL, así que se usan procesos. \\
+Normalización & CPU, en el mismo proceso & Es trivial y va pegada a la decodificación. Mandarla a la GPU costaría más en transferencias que lo que ahorra. \\
+Convoluciones (adelante y atrás) & GPU & Son el 89--98\,\% del cómputo: operaciones idénticas e independientes, ideales para miles de hilos. \\
+Capas densas, ReLU, pooling, BatchNorm, dropout, softmax & GPU & Productos de matrices y operaciones elemento por elemento. Se ejecutan donde ya están los datos. \\
+Adam & GPU & 1.1 M de actualizaciones independientes por paso. \\
+Aumento de datos & GPU & En Keras es parte del modelo. Se conserva ese diseño como transformaciones afines por lote. \\
+Algoritmos clásicos (Ejercicio 6) & CPU, sin cambios & scikit-learn no usa la GPU y cuML (RAPIDS) no existe para Windows. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=0.5cm and 0.7cm, every node/.style={font=\small},
+  caja/.style={draw, rounded corners=2pt, align=center, minimum height=1cm, inner sep=4pt},
+  flecha/.style={-{Stealth[length=2.2mm]}, thick}]
+\node[caja, fill=blue!6] (disco) {23\,200 JPEG\\en disco};
+\node[caja, fill=blue!6, right=of disco] (cpu) {\textbf{Fase 1 -- CPU}\\8 procesos: leer, decodificar,\\redimensionar, $\div255$};
+\node[caja, fill=blue!6, right=of cpu] (shm) {Tensor $X$ en\\memoria compartida\\(1.14\,GB)};
+\node[caja, fill=orange!8, below=1.1cm of shm] (gpu) {\textbf{Fase 2 -- GPU}\\convoluciones, densas,\\retropropagación, Adam};
+\node[caja, fill=orange!8, left=of gpu] (inf) {Inferencia\\y métricas};
+\draw[flecha] (disco) -- (cpu);
+\draw[flecha] (cpu) -- (shm);
+\draw[flecha] (shm) -- node[right, align=left, font=\footnotesize]{lotes de 64 (3\,MB)\\memoria \textit{pinned}, DMA} (gpu);
+\draw[flecha] (gpu) -- (inf);
+\end{tikzpicture}
+\caption{Separación del pipeline. Por el bus PCIe solo viajan tensores listos, en lotes; nunca archivos.}
+\end{figure}
+
+\paragraph{Fase 1 en CPU (\cod{src/preparacion.py}).}
+El proceso principal reserva un bloque de \cod{multiprocessing.shared\_memory} del tamaño del tensor final y reparte las 23\,200 rutas en 32 tramos contiguos: 4 por proceso, para balancear la carga. Cada trabajador de un \cod{ProcessPoolExecutor} se conecta al bloque, decodifica su tramo y escribe directamente en su parte del tensor. Al terminar devuelve solo tres enteros, sin copiar 1.14\,GB entre procesos.
+
+\paragraph{Fase 2 en GPU con PyTorch + cuDNN (\cod{src/modelos.py}, \cod{src/entrenamiento.py}).}
+Las arquitecturas son traducciones fieles de las de Keras: misma inicialización Glorot, Adam con $\epsilon=10^{-7}$ y BatchNorm con el momento de Keras. Los datos quedan en la RAM, en memoria \textit{pinned}, y cada lote se copia a la GPU de forma asíncrona. cuDNN elige el algoritmo de convolución para cada capa (\cod{cudnn.benchmark}). La pérdida y los aciertos se acumulan en la GPU y se leen una sola vez por época, para no sincronizar CPU y GPU 254 veces.
+
+\paragraph{Kernels propios en CUDA Python (\cod{src/kernels\_cuda.py}).}
+Para diseñar explícitamente el reparto en hilos, bloques y grid, la CNN Base completa (adelante, atrás y Adam) se implementó con 19 kernels de Numba. Las decisiones principales son:
+\begin{itemize}
+  \item \textbf{Convolución como producto de matrices implícito (\textit{implicit GEMM}).} La convolución se escribe como $\text{salida}_{P\times C_{out}} = A_{P\times 9C_{in}}\cdot W_{9C_{in}\times C_{out}}$, con $P$ = imágenes $\times$ alto $\times$ ancho. Cada bloque de $8\times16=128$ hilos calcula una baldosa de $64\times32$ salidas. Para eso carga en memoria compartida baldosas de $A$, que se arma al vuelo y nunca se guarda completa, y de $W$. Cada hilo acumula $4\times4$ salidas en registros (\textit{register tiling}). En la primera capa, con un lote de 64, el grid es de $(4096, 1)$ bloques.
+  \item \textbf{Gradiente de los pesos con \textit{split-K}.} La suma recorre hasta 262\,144 píxeles, así que se reparte en trozos de 4\,096 (\cod{blockIdx.z}) que se combinan con \cod{cuda.atomic.add}.
+  \item \textbf{Gradiente de la entrada.} Es otra convolución, con los pesos volteados $180^\circ$, y reutiliza el mismo kernel.
+  \item \textbf{Pooling.} Usa un hilo por salida. La retropropagación se hace sin atomics (las ventanas no se solapan) y va fusionada con la ReLU.
+  \item \textbf{Adam.} Usa un hilo por parámetro, en bloques de 256.
+  \item \textbf{Precisión.} Todo es \cod{float32}: la MX450 calcula \cod{float64} a 1/32 de la velocidad.
+  \item \textbf{Doble buffer.} La CPU arma el lote $i+1$ en memoria \textit{pinned} mientras la GPU calcula el lote $i$.
+\end{itemize}
+La implementación se validó contra PyTorch con los mismos pesos: los logits, la pérdida y los 10 gradientes coinciden con un error relativo de $\sim10^{-6}$. La Tabla~\ref{tab:numba} muestra cómo cada optimización redujo el tiempo por paso.
+
+\begin{table}[H]\centering\small
+\caption{Versiones de los kernels de convolución en Numba: un paso completo de entrenamiento con un lote de 64. Se midió después del entrenamiento completo, con la GPU caliente y su reloj a $\sim$450\,MHz: importa la mejora entre versiones más que el tiempo absoluto.}
+\label{tab:numba}
+\TablaNumbaVersiones
+\end{table}
+
+% =============================================================================
+\section{Resultados}
+
+\subsection{Línea base: el Lab 3 completo en esta laptop}
+
+\begin{table}[H]\centering\small
+\caption{El Lab 3 ejecutado completo en esta laptop (izquierda) y en la máquina original (derecha). Ambos en CPU con Keras/TensorFlow y EarlyStopping.}
+\label{tab:labtres}
+\tablaancha{\begin{tabular}{c}\TablaLabTres\end{tabular}}\\[2pt]
+{\footnotesize Columnas 2--5: esta laptop. Columnas 6--8: máquina original del Lab 3.}
+\end{table}
+
+Las exactitudes coinciden con las del original, lo que confirma que la solución es reproducible. Esta laptop tarda entre 2.6 y 3.2 veces más por época que la máquina original. El tiempo por época se mantuvo estable durante las más de dos horas de ejecución (CNN Base $\sim$\LabTresEpocaBase\,s y CNN Profunda $\sim$\LabTresEpocaProfunda\,s). En total, el entrenamiento de las cuatro CNN tomó \LabTresMinAqui\ minutos aquí y \LabTresMinOrig\ minutos en la máquina original.
+
+\subsection{Fase 1: preparación de datos en CPU}
+
+\begin{table}[H]\centering\small
+\caption{Preparación de las 23\,200 imágenes (\PrepReps{} corridas por configuración, con caché caliente). En todas las corridas, la salida paralela fue idéntica byte a byte a la secuencial: \PrepIdentico.}
+\label{tab:preparacion}
+\TablaPreparacion
+\end{table}
+
+\figura[0.8]{06_escalamiento_preparacion}{Escalamiento de la preparación con el número de procesos.}
+\figura{05_mapa_nucleos_preparacion}{Uso de cada hilo lógico del CPU durante la preparación secuencial y la paralela.}
+
+Con 8 procesos el speedup es de \PrepSpeedup, con una eficiencia de \PrepEficiencia. El escalamiento se aleja del ideal por tres razones:
+\begin{itemize}
+  \item El procesador tiene 4 núcleos físicos: del proceso 5 al 8 se comparten núcleos por hyper-threading.
+  \item Al subir la carga en todos los núcleos, la frecuencia del CPU baja.
+  \item Parte del tiempo es lectura de disco, que no escala con los núcleos.
+\end{itemize}
+Con un solo proceso, la versión paralela es un poco más lenta que la secuencial: paga el costo de crear el proceso y de la memoria compartida sin repartir el trabajo.
+
+\subsection{Fase 2: entrenamiento en GPU}
+
+\begin{table}[H]\centering\small
+\caption{Tiempo por época en régimen estable (3 épocas fijas, media $\pm$ desviación entre corridas), speedup respecto de la solución original (Keras/TF en CPU) e inferencia sobre las 3\,480 imágenes de prueba. ``Reloj GPU'' es la mediana del reloj de la GPU mientras estuvo ocupada.}
+\label{tab:entrenamiento}
+\tablaancha{\TablaEntrenamiento}
+\end{table}
+
+\figura{08_tiempo_por_epoca}{Tiempo por época de cada modelo en cada configuración.}
+\figura[0.75]{09_speedup_entrenamiento}{Speedup del entrenamiento por época respecto de Keras/TF en CPU.}
+
+\paragraph{Cómo leer la columna del reloj.} La MX450 llega a $\sim$1\,500\,MHz, pero tras unos 30\,s de carga continua el límite de potencia de la laptop baja su reloj a 350--500\,MHz (\cod{nvidia-smi} reporta \cod{SW Power Cap}). Las corridas de la CNN Base en PyTorch, de $\sim$25\,s cada una, se midieron casi a reloj completo (\GpuRelojBase\,MHz). Las demás se midieron con el reloj reducido; la CNN Profunda, por ejemplo, a \GpuRelojProfunda\,MHz. Por eso el speedup de la CNN Base es optimista para un entrenamiento largo, y el de los kernels de Numba (\NumbaReloj\,MHz) es pesimista respecto de su velocidad a reloj completo.
+
+\paragraph{El CPU también se frena.}\label{sec:cpu-termico} En las corridas de la CNN Base, de $\sim$100\,s cada una y con 60\,s de pausa, Keras tardó $\sim$\KerasEpocaBase\,s por época, casi lo mismo que en el Lab 3 completo ($\sim$\LabTresEpocaBase\,s). En las de la CNN Profunda, de 12 minutos seguidos cada una, la primera época empezó a $\sim$600\,ms por paso, como en el Lab 3. A los $\sim$2 minutos subió a $\sim$955\,ms por paso y ahí se quedó: $\sim$\KerasEpocaProfunda\,s por época, contra $\sim$\LabTresEpocaProfunda\,s en el Lab 3 completo. El CPU siguió ocupado al 97\,\%, así que corría a menor frecuencia. Durante esas corridas no hubo escaneos del antivirus ni cambios del modo de energía, y la RAM se mantuvo en 13.4\,GB. La causa es el control térmico de Intel (DPTF), que depende de la temperatura de la laptop y del ambiente. Durante el Lab 3 completo, que corrió en otra sesión, no se activó. Por eso el speedup de los modelos profundos (\SpeedupMax) es optimista. Tomando como referencia el tiempo por época del Lab 3 completo, la CNN Profunda se acelera \SpeedupProfundaLab{} y la CNN Base \SpeedupBaseLab.
+
+\figura{10_linea_tiempo_gpu}{Uso, reloj y temperatura de la GPU durante el entrenamiento de la CNN Profunda + Aug: el reloj baja cuando se activa el límite de potencia.}
+
+\subsection{Transferencias contra cómputo en la GPU}
+
+\begin{table}[H]\centering\small
+\caption{Desglose de una época en la GPU. ``CPU$\to$GPU'' son las copias de los lotes, medidas con eventos CUDA. ``Resto'' incluye el armado de lotes en Python y la sincronización.}
+\label{tab:desglose}
+\tablaancha{\TablaDesglose}
+\end{table}
+
+Las transferencias ocupan entre el \TransfMinPct{} y el \TransfMaxPct{} de cada época: cada lote pesa solo 3\,MB, viaja desde memoria \textit{pinned} y se copia mientras la GPU aún calcula el lote anterior. Casi todo el tiempo es cómputo en la GPU.
+
+\subsection{Entrenamiento completo y speedup por fase}
+
+En el notebook entregable, los cuatro modelos se entrenan en GPU con las mismas reglas de EarlyStopping que el Lab 3. La comparación es contra el Lab 3 completo en esta misma laptop.
+
+\begin{table}[H]\centering\small
+\caption{Entrenamiento completo con EarlyStopping: CPU (Lab 3, Keras) contra GPU (PyTorch + cuDNN), en la misma laptop.}
+\label{tab:completo}
+\tablaancha{\TablaCompleto}\\[2pt]
+{\footnotesize Columnas 2--4: CPU. Columnas 5--7: GPU.}
+\end{table}
+
+\figura{07_curvas_gpu}{Curvas de aprendizaje en GPU (exactitud de validación) y duración de cada época.}
+
+\begin{table}[H]\centering\small
+\caption{Speedup por fase y de extremo a extremo.}
+\label{tab:fases}
+\tablaancha{\TablaFases}
+\end{table}
+
+Con EarlyStopping, la CPU y la GPU pueden detenerse en épocas distintas, porque el orden de las operaciones en punto flotante cambia la trayectoria del entrenamiento. Por eso el speedup \emph{por época} (Tabla~\ref{tab:entrenamiento}) es la medida limpia del hardware. El total (Tabla~\ref{tab:fases}) es la medida práctica: cuánto esperó el equipo.
+
+\paragraph{Ley de Amdahl.} Si una fracción $f$ del tiempo se acelera $s$ veces, el speedup total es $S = 1/\left((1-f) + f/s\right)$. El entrenamiento es el \FraccionEntrenamiento{} del tiempo original y la preparación solo el \FraccionPrep. Acelerar únicamente el entrenamiento ya da \AmdahlSoloGPU{}, y el límite teórico, si el entrenamiento fuera instantáneo, sería \AmdahlLimite. Paralelizar la preparación casi no mueve el total en este pipeline, aunque sea la fase con el escalamiento más limpio.
+
+% =============================================================================
+\section{Evidencia de uso de recursos}
+
+Las capturas muestran que cada fase usó el hardware asignado. Además de las capturas, el monitor de \cod{src/monitor.py} registró el uso de cada núcleo y de la GPU una vez por segundo en todas las corridas (\cod{resultados/monitor/}), y \cod{evidencias/nvidia-smi/} contiene salidas completas de \cod{nvidia-smi} tomadas durante las mediciones.
+
+\captura{01_prep_secuencial_cpu.png}{Preparación secuencial: un solo hilo lógico ocupado.}
+\captura{02_prep_paralela_cpu.png}{Preparación paralela con 8 procesos: todos los hilos lógicos del CPU ocupados.}
+\captura{03_entrenamiento_gpu_taskmgr.png}{Entrenamiento en GPU: gráfica \textit{Cuda} de la MX450 y memoria dedicada en uso (Administrador de Tareas).}
+\captura{04_entrenamiento_gpu_nvidia_smi.png}{Entrenamiento en GPU: \cod{nvidia-smi} con la utilización, la memoria y el proceso \cod{python.exe}.}
+\captura{05_entrenamiento_cpu_keras.png}{Línea base: Keras/TF entrenando en CPU con todos los hilos ocupados y la GPU en reposo.}
+\captura{06_kernels_numba_gpu.png}{Kernels propios en Numba ejecutándose en la GPU.}
+
+% =============================================================================
+\section{Discusión técnica}
+
+\subsection*{¿Por qué es más eficiente procesar las imágenes con los núcleos del CPU y delegar solo la matemática de la red a la GPU?}
+
+Porque cada fase tiene la forma de trabajo de un procesador distinto.
+
+\textbf{La preparación encaja con la CPU.} Decodificar un JPEG es lógica secuencial con muchas ramas: decodificación Huffman de longitud variable, lectura de cabeceras y metadatos, y acceso al sistema de archivos. Una CPU tiene pocos núcleos, pero rápidos, con predicción de saltos y cachés grandes, y Pillow es una biblioteca de CPU. Una GPU, en cambio, ejecuta grupos de 32 hilos en el mismo paso (\textit{warps}) y pierde rendimiento cuando cada hilo toma una rama distinta. Además, los archivos están en el disco de la CPU: decodificarlos en la GPU obligaría a subir primero los datos comprimidos, y aun así el redimensionado y la normalización son tan baratos que la transferencia costaría más que lo que ahorra. Como las 23\,200 imágenes son independientes, basta repartirlas entre procesos. Así se obtuvo \PrepSpeedup{} con 8 procesos sin tocar la GPU.
+
+\textbf{La matemática de la red encaja con la GPU.} Las convoluciones son millones de multiplicaciones-suma idénticas e independientes ($\sim$4 a 15 TFLOP por época), exactamente el patrón SIMT de una GPU.
+
+\textbf{La separación minimiza el bus.} Por PCIe solo viajan tensores listos (3\,MB por lote), y los pesos, las activaciones y los gradientes nunca salen de la GPU durante el entrenamiento. Así, las transferencias representan menos del \TransfMaxPct{} del tiempo de cada época.
+
+\subsection*{¿Cómo CUDA permitió reducir o cambiar el tiempo de procesamiento?}
+
+Con cuDNN, el tiempo por época bajó entre \SpeedupMin{} y \SpeedupMax{} (entre \SpeedupBaseLab{} y \SpeedupProfundaLab{} contra el Lab 3 completo, sección~\ref{sec:cpu-termico}), y la inferencia entre \SpeedupInfMin{} y \SpeedupInfMax{} (Tabla~\ref{tab:entrenamiento}). En el entrenamiento completo, el tiempo pasó de \CompletoMinCPU{} a \CompletoMinGPU{} minutos, y el pipeline completo se aceleró \SpeedupTotal.
+
+El efecto crece con el cómputo por imagen. La CNN Profunda (155 M multiplicaciones-suma por imagen) gana más que la Base (42 M), incluso con la referencia conservadora (\SpeedupProfundaLab{} contra \SpeedupBaseLab): con poco trabajo por lote, los costos fijos pesan más (lanzar kernels, copiar el lote y la lógica de Python en cada paso). También cambió \emph{qué} limita el tiempo. En la CPU, el límite es la capacidad aritmética. En la GPU, el cómputo sigue siendo la mayor parte de la época, pero su velocidad depende sobre todo del reloj que permite el límite de potencia de la laptop.
+
+Los kernels propios en Numba muestran cuánto aporta la ingeniería detrás de cuDNN. Cada optimización tuvo un efecto grande (Tabla~\ref{tab:numba}): pasar de un hilo por salida a un producto de matrices con baldosas en memoria compartida, y luego al \textit{register tiling}, redujo el tiempo por paso varias veces. Aun así, en un entrenamiento sostenido la época tardó $\sim$\NumbaEpoca\,s, con un speedup de \SpeedupNumba{} respecto de Keras. Es \NumbaVsTorchCPU{} más rápido que PyTorch en CPU, pero queda lejos de cuDNN. cuDNN elige entre varios algoritmos por capa (GEMM implícito, Winograd, FFT) con kernels ajustados a cada arquitectura, y fusiona operaciones; además, nuestros kernels corrieron a $\sim$\NumbaReloj\,MHz durante casi toda la medición.
+
+\subsection*{¿Qué factores justifican o limitan la utilización de CUDA?}
+
+\textbf{La justifican:}
+\begin{itemize}
+  \item El volumen de operaciones aritméticas independientes de las convoluciones.
+  \item Un tamaño de lote que llena los multiprocesadores.
+  \item Que los datos se queden en la GPU entre operaciones, sin ir y venir por PCIe.
+  \item Que existan bibliotecas maduras (cuDNN, cuBLAS) que ya resuelven la parte difícil.
+\end{itemize}
+
+\textbf{La limitan, en este caso:}
+\begin{enumerate}
+  \item \textbf{Una GPU de entrada frente a una CPU fuerte.} La MX450 tiene 896 núcleos CUDA y 2\,GB. Del otro lado, TensorFlow ya usa los 8 hilos del CPU con oneDNN y AVX-512: la línea base ``secuencial'' en realidad ya es paralela.
+  \item \textbf{El límite de potencia de la laptop.} Tras $\sim$30\,s de carga, la GPU baja de $\sim$1\,500 a $\sim$400\,MHz.
+  \item \textbf{La memoria de 2\,GB.} Obliga a transferir los datos por lotes y limita el tamaño de lote.
+  \item \textbf{La Ley de Amdahl.} Lo que no corre en la GPU acota el speedup total.
+  \item \textbf{El soporte de plataforma.} TensorFlow ya no tiene soporte de GPU en Windows nativo desde la versión 2.11, lo que obligó a portar los modelos a PyTorch. En modo WDDM, un kernel de más de $\sim$2\,s reinicia el controlador.
+  \item \textbf{La compatibilidad de versiones.} El compilador NVVM de Numba tuvo que fijarse a la misma versión 12.8 del \cod{nvJitLink} que trae PyTorch, y NumPy a una versión menor a la 2.5.
+  \item \textbf{Las condiciones del sistema.} Con la RAM casi llena, el entrenamiento en CPU se volvió 1.8 veces más lento, y con el modo de energía en ``eficiencia'' hasta 4 veces más lento. Ambas mediciones se descartaron. Además, con carga sostenida el control térmico de Intel frenó el CPU $\sim$1.6 veces en la CNN Profunda; esa medición se conservó, pero el speedup se reporta también contra el Lab 3 completo. Medir en una laptop exige controlar estas condiciones.
+\end{enumerate}
+
+\subsection*{Bibliotecas y funciones que permitieron usar la GPU}
+
+\begin{itemize}
+  \item \textbf{PyTorch} (\cod{torch.cuda}):
+    \begin{itemize}
+      \item tensores en GPU y copias asíncronas con \cod{non\_blocking};
+      \item memoria \textit{pinned} con \cod{pin\_memory()};
+      \item eventos para medir tiempos (\cod{torch.cuda.Event}) y sincronización (\cod{torch.cuda.synchronize});
+      \item autoajuste de cuDNN con \cod{torch.backends.cudnn.benchmark}.
+    \end{itemize}
+  \item \textbf{cuDNN}: convoluciones, BatchNorm y pooling, llamados a través de PyTorch.
+  \item \textbf{cuBLAS}: productos de matrices de las capas densas, también a través de PyTorch.
+  \item \textbf{Numba CUDA}:
+    \begin{itemize}
+      \item \cod{@cuda.jit} para compilar los kernels;
+      \item memoria compartida y registros con \cod{cuda.shared.array} y \cod{cuda.local.array};
+      \item \cod{cuda.syncthreads} y \cod{cuda.atomic.add};
+      \item \cod{cuda.pinned\_array}, \cod{cuda.default\_stream} y \cod{cuda.event};
+      \item números aleatorios en la GPU para el dropout con \cod{numba.cuda.random}.
+    \end{itemize}
+  \item \textbf{En CPU}: \cod{concurrent.futures.ProcessPoolExecutor} y \cod{multiprocessing.shared\_memory}.
+  \item \textbf{Monitoreo}: \cod{psutil} y \cod{nvidia-smi}.
+\end{itemize}
+
+% =============================================================================
+\section{Conclusiones}
+
+\begin{itemize}
+  \item Separar el pipeline por tipo de trabajo funcionó. La preparación en 8 procesos se aceleró \PrepSpeedup, y el entrenamiento con cuDNN entre \SpeedupMin{} y \SpeedupMax{} por época (\SpeedupBaseLab{} a \SpeedupProfundaLab{} contra el Lab 3 completo), con las mismas exactitudes que el Lab 3.
+  \item El speedup de extremo a extremo (\SpeedupTotal) lo domina el entrenamiento, que es el \FraccionEntrenamiento{} del tiempo original. Es la Ley de Amdahl en la práctica.
+  \item Las transferencias CPU$\rightarrow$GPU no fueron el cuello de botella (menos del \TransfMaxPct{} por época) gracias a los lotes pequeños, la memoria \textit{pinned} y las copias asíncronas.
+  \item En una laptop, el límite de potencia de la GPU determina el rendimiento sostenido tanto como el número de núcleos. Medir el reloj junto con el tiempo fue necesario para interpretar los speedups.
+  \item Escribir los kernels a mano muestra el diseño en hilos, bloques y grid y el efecto de cada optimización. Para entrenar en la práctica, cuDNN es la opción correcta.
+\end{itemize}
+
+% =============================================================================
+\appendix
+\section{Reproducción}
+
+El código está en el repositorio del proyecto:
+\begin{itemize}
+  \item \cod{proyecto3\_cuda.ipynb}: el entregable, con los pasos 1--6 ejecutados en vivo.
+  \item \cod{src/}: los módulos de cada fase.
+  \item \cod{resultados/}: los CSV, los registros del monitor y el Lab 3 ejecutado en esta laptop.
+  \item \cod{lab3\_original/}: el Lab 3 sin modificar.
+\end{itemize}
+
+Las mediciones se repiten con:
+\begin{verbatim}
+python -m src.correr_experimentos          # mediciones repetidas (resultados/)
+python -m jupyter nbconvert --to notebook --execute --inplace proyecto3_cuda.ipynb
+python -m src.cifras_latex                 # regenera informe/cifras.tex
+\end{verbatim}
+Las versiones exactas de cada biblioteca están en \cod{requirements.txt}.
+
+\end{document}

@@ -1,0 +1,50 @@
+[
+ {
+  "paso": "torch_gpu",
+  "log": "resultados\\logs\\torch_gpu__entrenamiento_torch_cuda_CNNBase_3_3.log",
+  "codigo": 0,
+  "minutos": 1.87
+ },
+ {
+  "paso": "torch_gpu",
+  "log": "resultados\\logs\\torch_gpu__entrenamiento_torch_cuda_CNNProfunda_3_3.log",
+  "codigo": 0,
+  "minutos": 6.64
+ },
+ {
+  "paso": "torch_gpu",
+  "log": "resultados\\logs\\torch_gpu__entrenamiento_torch_cuda_CNNBase_Aug_3_3.log",
+  "codigo": 0,
+  "minutos": 2.43
+ },
+ {
+  "paso": "torch_gpu",
+  "log": "resultados\\logs\\torch_gpu__entrenamiento_torch_cuda_CNNProfunda_Aug_3_3.log",
+  "codigo": 0,
+  "minutos": 6.14
+ },
+ {
+  "paso": "numba_gpu",
+  "log": "resultados\\logs\\numba_gpu__entrenamiento_numba_cuda_CNNBase_3_3.log",
+  "codigo": 0,
+  "minutos": 8.38
+ },
+ {
+  "paso": "torch_cpu",
+  "log": "resultados\\logs\\torch_cpu__entrenamiento_torch_cpu_CNNBase_3_1.log",
+  "codigo": 0,
+  "minutos": 8.77
+ },
+ {
+  "paso": "torch_cpu",
+  "log": "resultados\\logs\\torch_cpu__entrenamiento_torch_cpu_CNNProfunda_2_1.log",
+  "codigo": 0,
+  "minutos": 13.16
+ },
+ {
+  "paso": "lab3",
+  "log": "resultados\\logs\\lab3__lab3.log",
+  "codigo": 0,
+  "minutos": 135.92
+ }
+]

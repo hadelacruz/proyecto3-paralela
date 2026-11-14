@@ -1,0 +1,4 @@
+,ms por paso (lote 64),s por época (254 pasos),Mejora sobre v1
+v1 directa (un hilo por salida),1154.922809999698,293.35039373992333,1.0
+"v2 implicit GEMM, baldosas 16×16",255.51020499988226,64.8995920699701,4.5200652944575355
+v3 implicit GEMM + register tiling 4×4,175.4451799999515,44.56307571998768,6.582812990359822

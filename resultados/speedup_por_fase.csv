@@ -1,0 +1,5 @@
+,Original (s),Paralelo (s),Hardware paralelo,Speedup,% del tiempo original
+"1. Preparación de 23,200 imágenes",24.897,9.3744,"CPU, 8 procesos",2.6558499743983615,0.003712920105456654
+2. Entrenamiento de los 4 modelos (EarlyStopping),6648.0,1938.680721700002,GPU MX450 (PyTorch + cuDNN),3.429136074644855,0.991424382900584
+3. Inferencia sobre prueba (4 modelos),32.606833333333334,5.907333333333334,GPU MX450,5.519721250423203,0.004862696993959415
+Total del pipeline,6705.503833333333,1953.9624550333353,,3.4317465087725725,1.0

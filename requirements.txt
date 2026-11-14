@@ -1,0 +1,42 @@
+# Proyecto 3 — versiones exactas con las que se obtuvieron los resultados.
+# Python 3.13.7, Windows 11, controlador NVIDIA con soporte CUDA >= 12.8.
+#
+# Instalación (ver README):
+#   python -m venv C:\Users\<usuario>\venvs\proyecto3-cuda
+#   <venv>\Scripts\python -m pip install -r requirements.txt
+#
+# PyTorch con CUDA se descarga del índice de PyTorch, no de PyPI:
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+torchvision==0.26.0+cu128
+
+# Línea base del Lab 3 (TensorFlow no usa la GPU en Windows nativo desde la 2.11)
+tensorflow==2.21.0
+keras==3.15.1
+
+# CUDA Python: kernels propios con Numba
+numba==0.68.1
+numba-cuda==0.30.4
+# El compilador de Numba (NVVM) debe ser de la MISMA versión 12.8 que el
+# nvJitLink que trae PyTorch cu128: si se instala 12.9, al usar Numba después de
+# importar PyTorch falla con "nvJitLinkError: ERROR_INTERNAL ... may need newer
+# version of nvJitLink library".
+nvidia-cuda-nvcc-cu12==12.8.93
+nvidia-cuda-nvrtc-cu12==12.8.93
+nvidia-cuda-runtime-cu12==12.8.90
+nvidia-nvjitlink-cu12==12.8.93
+# numba-cuda 0.30 usa np.row_stack, eliminado en NumPy 2.5
+numpy==2.4.6
+
+# Datos, métricas y gráficas
+pandas==3.1.1
+pillow==13.0.0
+scikit-learn==1.9.1
+matplotlib==3.11.2
+
+# Monitoreo y notebooks
+psutil==7.2.2
+jupyter==1.1.1
+ipykernel==7.4.0
+nbformat==5.11.1
+nbconvert==7.17.2

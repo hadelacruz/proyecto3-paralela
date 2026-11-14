@@ -1,0 +1,4 @@
+fecha,rep,framework,dispositivo,modelo,epocas,lote,t_total_s,t_primera_epoca_s,t_epoca_media_sin_1ra_s,t_transferencia_s,t_computo_gpu_s,val_accuracy_final,test_accuracy,t_inferencia_test_s,cpu_media_pct,gpu_util_media_pct,gpu_mem_max_mb
+20261113_234520,1,keras,cpu,CNN Base,3,64,155.022,51.783,51.619,0.0,0.0,0.9003,0.9055,3.7355,95.8,0.0,0.0
+20261113_234934,2,keras,cpu,CNN Base,3,64,243.939,60.582,91.678,0.0,0.0,0.9003,0.9055,7.5579,99.5,0.0,1.0
+20261113_235350,3,keras,cpu,CNN Base,3,64,248.511,90.513,78.999,0.0,0.0,0.9003,0.9055,4.5618,98.1,0.0,0.0

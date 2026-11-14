@@ -1,0 +1,26 @@
+[
+ {
+  "paso": "keras_cpu",
+  "log": "resultados\\logs\\keras_cpu__entrenamiento_keras_cpu_CNNBase_3_3.log",
+  "codigo": 0,
+  "minutos": 5.69
+ },
+ {
+  "paso": "keras_cpu",
+  "log": "resultados\\logs\\keras_cpu__entrenamiento_keras_cpu_CNNProfunda_3_3.log",
+  "codigo": 0,
+  "minutos": 36.12
+ },
+ {
+  "paso": "keras_cpu",
+  "log": "resultados\\logs\\keras_cpu__entrenamiento_keras_cpu_CNNBase_Aug_3_3.log",
+  "codigo": 0,
+  "minutos": 7.1
+ },
+ {
+  "paso": "keras_cpu",
+  "log": "resultados\\logs\\keras_cpu__entrenamiento_keras_cpu_CNNProfunda_Aug_3_3.log",
+  "codigo": 0,
+  "minutos": 37.7
+ }
+]

@@ -1,0 +1,92 @@
+Datos: train (16240, 64, 64, 3), val (3480, 64, 64, 3), test (3480, 64, 64, 3)
+
+=== keras | cpu | CNN Base | rep 1/3 ===
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1794635807.231668   26732 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1794635810.041400   26732 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1794635811.152157   26732 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+Epoch 1/3
+254/254 - 33s - 130ms/step - accuracy: 0.2529 - loss: 2.5365 - val_accuracy: 0.6049 - val_loss: 1.3048
+Epoch 2/3
+254/254 - 30s - 120ms/step - accuracy: 0.6159 - loss: 1.1687 - val_accuracy: 0.8132 - val_loss: 0.6384
+Epoch 3/3
+254/254 - 32s - 125ms/step - accuracy: 0.7717 - loss: 0.6869 - val_accuracy: 0.9003 - val_loss: 0.3475
+{
+ "fecha": "20261113_235829",
+ "rep": 1,
+ "framework": "keras",
+ "dispositivo": "cpu",
+ "modelo": "CNN Base",
+ "epocas": 3,
+ "lote": 64,
+ "t_total_s": 95.063,
+ "t_primera_epoca_s": 32.923,
+ "t_epoca_media_sin_1ra_s": 31.07,
+ "t_transferencia_s": 0.0,
+ "t_computo_gpu_s": 0.0,
+ "val_accuracy_final": 0.9003,
+ "test_accuracy": 0.9055,
+ "t_inferencia_test_s": 2.2613,
+ "cpu_media_pct": 91.8,
+ "gpu_util_media_pct": 0.0,
+ "gpu_mem_max_mb": 0.0
+}
+
+=== keras | cpu | CNN Base | rep 2/3 ===
+Epoch 1/3
+254/254 - 33s - 131ms/step - accuracy: 0.2529 - loss: 2.5365 - val_accuracy: 0.6049 - val_loss: 1.3048
+Epoch 2/3
+254/254 - 34s - 134ms/step - accuracy: 0.6159 - loss: 1.1687 - val_accuracy: 0.8132 - val_loss: 0.6384
+Epoch 3/3
+254/254 - 36s - 141ms/step - accuracy: 0.7717 - loss: 0.6869 - val_accuracy: 0.9003 - val_loss: 0.3475
+{
+ "fecha": "20261114_000016",
+ "rep": 2,
+ "framework": "keras",
+ "dispositivo": "cpu",
+ "modelo": "CNN Base",
+ "epocas": 3,
+ "lote": 64,
+ "t_total_s": 103.135,
+ "t_primera_epoca_s": 33.31,
+ "t_epoca_media_sin_1ra_s": 34.913,
+ "t_transferencia_s": 0.0,
+ "t_computo_gpu_s": 0.0,
+ "val_accuracy_final": 0.9003,
+ "test_accuracy": 0.9055,
+ "t_inferencia_test_s": 2.7346,
+ "cpu_media_pct": 93.7,
+ "gpu_util_media_pct": 0.0,
+ "gpu_mem_max_mb": 0.0
+}
+
+=== keras | cpu | CNN Base | rep 3/3 ===
+Epoch 1/3
+254/254 - 39s - 154ms/step - accuracy: 0.2529 - loss: 2.5365 - val_accuracy: 0.6049 - val_loss: 1.3048
+Epoch 2/3
+254/254 - 38s - 150ms/step - accuracy: 0.6159 - loss: 1.1687 - val_accuracy: 0.8132 - val_loss: 0.6384
+Epoch 3/3
+254/254 - 39s - 152ms/step - accuracy: 0.7717 - loss: 0.6869 - val_accuracy: 0.9003 - val_loss: 0.3475
+{
+ "fecha": "20261114_000216",
+ "rep": 3,
+ "framework": "keras",
+ "dispositivo": "cpu",
+ "modelo": "CNN Base",
+ "epocas": 3,
+ "lote": 64,
+ "t_total_s": 115.823,
+ "t_primera_epoca_s": 39.203,
+ "t_epoca_media_sin_1ra_s": 38.31,
+ "t_transferencia_s": 0.0,
+ "t_computo_gpu_s": 0.0,
+ "val_accuracy_final": 0.9003,
+ "test_accuracy": 0.9055,
+ "t_inferencia_test_s": 2.7065,
+ "cpu_media_pct": 95.6,
+ "gpu_util_media_pct": 0.0,
+ "gpu_mem_max_mb": 0.0
+}

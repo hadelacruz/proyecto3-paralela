@@ -1,0 +1,10 @@
+[16:45:43] prep: -m src.benchmark preparacion --reps 5
+    -> código 0, 8.0 min, log: resultados\logs\prep__preparacion_5.log
+[16:54:44] keras_cpu: -m src.benchmark entrenamiento --framework keras --dispositivo cpu --modelo CNN Base --epocas 3 --reps 3
+    -> código 0, 8.1 min, log: resultados\logs\keras_cpu__entrenamiento_keras_cpu_CNNBase_3_3.log
+[17:03:47] keras_cpu: -m src.benchmark entrenamiento --framework keras --dispositivo cpu --modelo CNN Profunda --epocas 3 --reps 3
+    -> código 0, 44.1 min, log: resultados\logs\keras_cpu__entrenamiento_keras_cpu_CNNProfunda_3_3.log
+[17:48:55] keras_cpu: -m src.benchmark entrenamiento --framework keras --dispositivo cpu --modelo CNN Base + Aug --epocas 3 --reps 3
+    -> código 0, 9.2 min, log: resultados\logs\keras_cpu__entrenamiento_keras_cpu_CNNBase_Aug_3_3.log
+[17:59:09] keras_cpu: -m src.benchmark entrenamiento --framework keras --dispositivo cpu --modelo CNN Profunda + Aug --epocas 3 --reps 3
+    -> código 1, 29.2 min, log: resultados\logs\keras_cpu__entrenamiento_keras_cpu_CNNProfunda_Aug_3_3.log

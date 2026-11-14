@@ -1,0 +1,92 @@
+Datos: train (16240, 64, 64, 3), val (3480, 64, 64, 3), test (3480, 64, 64, 3)
+
+=== keras | cpu | CNN Profunda + Aug | rep 1/3 ===
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1794638926.938490   30528 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1794638931.856823   30528 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1794638933.300514   30528 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+Epoch 1/3
+254/254 - 191s - 752ms/step - accuracy: 0.1376 - loss: 2.9288 - val_accuracy: 0.0345 - val_loss: 10.1985
+Epoch 2/3
+254/254 - 204s - 803ms/step - accuracy: 0.4787 - loss: 1.6197 - val_accuracy: 0.2155 - val_loss: 3.8430
+Epoch 3/3
+254/254 - 234s - 920ms/step - accuracy: 0.7123 - loss: 0.8473 - val_accuracy: 0.7391 - val_loss: 0.7105
+{
+ "fecha": "20261114_005945",
+ "rep": 1,
+ "framework": "keras",
+ "dispositivo": "cpu",
+ "modelo": "CNN Profunda + Aug",
+ "epocas": 3,
+ "lote": 64,
+ "t_total_s": 628.671,
+ "t_primera_epoca_s": 191.124,
+ "t_epoca_media_sin_1ra_s": 218.773,
+ "t_transferencia_s": 0.0,
+ "t_computo_gpu_s": 0.0,
+ "val_accuracy_final": 0.7391,
+ "test_accuracy": 0.7348,
+ "t_inferencia_test_s": 20.8432,
+ "cpu_media_pct": 95.4,
+ "gpu_util_media_pct": 0.0,
+ "gpu_mem_max_mb": 0.0
+}
+
+=== keras | cpu | CNN Profunda + Aug | rep 2/3 ===
+Epoch 1/3
+254/254 - 273s - 1s/step - accuracy: 0.1376 - loss: 2.9288 - val_accuracy: 0.0345 - val_loss: 10.1985
+Epoch 2/3
+254/254 - 263s - 1s/step - accuracy: 0.4787 - loss: 1.6197 - val_accuracy: 0.2155 - val_loss: 3.8430
+Epoch 3/3
+254/254 - 259s - 1s/step - accuracy: 0.7123 - loss: 0.8473 - val_accuracy: 0.7391 - val_loss: 0.7105
+{
+ "fecha": "20261114_011316",
+ "rep": 2,
+ "framework": "keras",
+ "dispositivo": "cpu",
+ "modelo": "CNN Profunda + Aug",
+ "epocas": 3,
+ "lote": 64,
+ "t_total_s": 795.32,
+ "t_primera_epoca_s": 273.092,
+ "t_epoca_media_sin_1ra_s": 261.114,
+ "t_transferencia_s": 0.0,
+ "t_computo_gpu_s": 0.0,
+ "val_accuracy_final": 0.7391,
+ "test_accuracy": 0.7348,
+ "t_inferencia_test_s": 13.0239,
+ "cpu_media_pct": 98.7,
+ "gpu_util_media_pct": 0.0,
+ "gpu_mem_max_mb": 0.0
+}
+
+=== keras | cpu | CNN Profunda + Aug | rep 3/3 ===
+Epoch 1/3
+254/254 - 265s - 1s/step - accuracy: 0.1376 - loss: 2.9288 - val_accuracy: 0.0345 - val_loss: 10.1985
+Epoch 2/3
+254/254 - 248s - 975ms/step - accuracy: 0.4787 - loss: 1.6197 - val_accuracy: 0.2155 - val_loss: 3.8430
+Epoch 3/3
+254/254 - 248s - 976ms/step - accuracy: 0.7123 - loss: 0.8473 - val_accuracy: 0.7391 - val_loss: 0.7105
+{
+ "fecha": "20261114_012611",
+ "rep": 3,
+ "framework": "keras",
+ "dispositivo": "cpu",
+ "modelo": "CNN Profunda + Aug",
+ "epocas": 3,
+ "lote": 64,
+ "t_total_s": 760.159,
+ "t_primera_epoca_s": 264.753,
+ "t_epoca_media_sin_1ra_s": 247.703,
+ "t_transferencia_s": 0.0,
+ "t_computo_gpu_s": 0.0,
+ "val_accuracy_final": 0.7391,
+ "test_accuracy": 0.7348,
+ "t_inferencia_test_s": 12.4942,
+ "cpu_media_pct": 97.8,
+ "gpu_util_media_pct": 0.0,
+ "gpu_mem_max_mb": 0.0
+}
